@@ -163,17 +163,3 @@ Add a realistic Emu standing on the grass in the left side of the picture.
 ```
 
 ---
-
-## Quick Troubleshooting
-
-| Problem | What to Do |
-|---|---|
-| The Generate button is not active | Make sure a prompt has been entered. |
-| The picture does not upload | Check that the file is PNG, JPG, or WEBP and under the upload size limit. |
-| The Emu appears in the wrong place | Add more detail to the prompt, such as the location where the Emu should appear. |
-| The result does not look realistic | Try generating again or use a more specific prompt. |
-| You cannot sign in | Check your email address, password, or use another sign-in method. |
-
-## Summary
-
-You have now signed up for Leonardo.AI, opened the AI image creation interface, selected a starting picture, entered a prompt, and generated a final image with an Emu added to the scene.
