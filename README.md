@@ -162,4 +162,46 @@ If the Emu does not look correct, edit the prompt and generate again. For exampl
 Add a realistic Emu standing on the grass in the left side of the picture.
 ```
 
----
+# Task 3 answer: Graph Navigator Bot — Full Graph
+ 
+The chatbot's graph definition was embedded (XOR + Base64 encoded) inside the page's
+`<script>` block. Decoding it reveals the following graph:
+ 
+- **START node:** WRAIT
+- **GOAL node:** GLINT
+- **10 nodes**, **15 edges** (some directed `->`, some bidirectional `--` / `<>`)
+## Decoded graph source
+ 
+```
+START WRAIT
+GOAL GLINT
+ 
+NODE WRAIT, TITAN, NEXA, DELTA, LUMA, GIVA, JOLT, ZORI, VISTA, GLINT
+ 
+EDGE WRAIT -> TITAN (1)
+EDGE WRAIT -> NEXA  (1)
+EDGE TITAN -- DELTA (1)   [bidirectional]
+EDGE TITAN -> LUMA  (1)
+EDGE NEXA  <> LUMA  (1)   [bidirectional]
+EDGE NEXA  -> GIVA  (1)
+EDGE DELTA -> JOLT  (2)
+EDGE LUMA  -> ZORI  (1)
+EDGE GIVA  <> ZORI  (1)   [bidirectional]
+EDGE GIVA  -> VISTA (1)
+EDGE JOLT  -> GLINT (3)
+EDGE ZORI  -> GLINT (1)
+EDGE VISTA -- GLINT (1)   [bidirectional]
+EDGE ZORI  <> VISTA (1)   [bidirectional]
+EDGE TITAN <> NEXA  (1)   [bidirectional]
+```
+ 
+All 10 nodes are reachable from START (WRAIT), and GLINT (GOAL) is reachable via three
+different paths: WRAIT→TITAN→DELTA→JOLT→GLINT, WRAIT→...→LUMA→ZORI→GLINT, and
+...→GIVA→VISTA→GLINT.
+ 
+## Full graph diagram
+ 
+Double-headed arrows = bidirectional edges (`--` or `<>`). Single-headed arrows =
+one-way edges (`->`). Numbers on edges are the transition weights.
+ 
+![Full graph](graph.jpg)
