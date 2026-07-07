@@ -204,4 +204,4 @@ different paths: WRAIT→TITAN→DELTA→JOLT→GLINT, WRAIT→...→LUMA→ZORI
 Double-headed arrows = bidirectional edges (`--` or `<>`). Single-headed arrows =
 one-way edges (`->`). Numbers on edges are the transition weights.
  
-![Full graph](answer.jpg)
+![Full graph](images/answer.jpg)
