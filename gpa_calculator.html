@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPA Calculator</title>
+<style>
+  :root{
+    --paper:#F6F1E6;
+    --paper-2:#EFE8D8;
+    --ink:#1C2541;
+    --ink-soft:#4A5578;
+    --gold:#B8912F;
+    --gold-light:#E4CE8E;
+    --line:#D8CBAE;
+    --pass:#3F6C51;
+    --pass-bg:#DCE9DF;
+    --fail:#9C3B3B;
+    --fail-bg:#F1DEDA;
+    --progress:#7A6A2E;
+    --progress-bg:#EFE4C4;
+    --shadow: 0 8px 24px rgba(28,37,65,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(184,145,47,0.10), transparent 40%),
+      var(--paper);
+    color:var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height:1.5;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  .page{
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Header / letterhead ---------- */
+  .letterhead{
+    display:flex;
+    align-items:center;
+    gap:1.1rem;
+    border-bottom: 3px double var(--gold);
+    padding-bottom: 1.4rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .seal{
+    flex: 0 0 auto;
+    width: 58px; height:58px;
+    border-radius:50%;
+    border: 2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight:700;
+    font-size:1.4rem;
+    color:var(--gold);
+    background: var(--paper-2);
+    position:relative;
+  }
+  .seal::after{
+    content:"";
+    position:absolute; inset:5px;
+    border:1px solid var(--gold);
+    border-radius:50%;
+    opacity:0.6;
+  }
+
+  .letterhead .titles{ flex:1 1 auto; min-width:0; }
+
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin:0 0 0.15rem;
+    font-weight:600;
+  }
+
+  h1{
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.6rem, 4vw, 2.15rem);
+    margin:0;
+    color:var(--ink);
+    letter-spacing:0.01em;
+  }
+
+  .program-line{
+    display:flex; align-items:center; gap:0.6rem;
+    flex-wrap:wrap;
+    margin-top:0.5rem;
+    font-size:0.98rem;
+    color:var(--ink-soft);
+  }
+  .program-line strong{ color:var(--ink); font-weight:700; }
+
+  .edit-note{
+    font-size:0.78rem;
+    color:var(--progress);
+    background:var(--progress-bg);
+    border:1px solid var(--gold-light);
+    padding:0.15rem 0.55rem;
+    border-radius:999px;
+  }
+
+  /* ---------- Info icon + tooltip/popover ---------- */
+  .policy-row{
+    display:flex; align-items:center; gap:0.5rem;
+    margin: 0 0 1.6rem;
+  }
+  .policy-label{
+    font-size:0.92rem;
+    color:var(--ink-soft);
+  }
+
+  .info-wrap{ position:relative; display:inline-flex; }
+
+  .info-btn{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1.5px solid var(--gold);
+    background:transparent;
+    color:var(--gold);
+    font-weight:700;
+    font-size:0.78rem;
+    line-height:1;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-family: Georgia, serif;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .info-btn:hover, .info-btn:focus-visible{
+    background:var(--gold);
+    color:#fff;
+  }
+  .info-btn:focus-visible{ outline: 3px solid var(--ink-soft); outline-offset:2px; }
+
+  .popover{
+    position:absolute;
+    top: 32px;
+    left: 0;
+    width: min(560px, 88vw);
+    max-height: 60vh;
+    overflow-y:auto;
+    background: #FFFDF8;
+    border: 1px solid var(--gold-light);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.3rem 1.5rem;
+    z-index: 40;
+    display:none;
+  }
+  .popover.open{ display:block; }
+
+  .popover h2{
+    font-family: Georgia, serif;
+    font-size:1.15rem;
+    margin: 0 0 0.2rem;
+    color:var(--ink);
+  }
+  .popover .doc-sub{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin: 0 0 0.9rem;
+    font-style:italic;
+  }
+  .popover h3{
+    font-size:0.92rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    margin: 1.1rem 0 0.4rem;
+  }
+  .popover p{ font-size:0.9rem; margin:0.3rem 0; }
+  .popover ol, .popover ul{ font-size:0.9rem; margin:0.3rem 0; padding-left:1.2rem; }
+  .popover table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.85rem;
+    margin: 0.4rem 0 0.6rem;
+  }
+  .popover th, .popover td{
+    border:1px solid var(--line);
+    padding:0.35rem 0.55rem;
+    text-align:center;
+  }
+  .popover th{ background: var(--paper-2); }
+  .popover .formula{
+    font-family: "Courier New", monospace;
+    background: var(--paper-2);
+    border:1px dashed var(--gold-light);
+    padding: 0.6rem 0.8rem;
+    border-radius:6px;
+    font-size:0.85rem;
+  }
+  .popover .close-btn{
+    position:sticky; top:0; float:right;
+    background:none; border:none;
+    font-size:1.1rem; color:var(--ink-soft);
+    cursor:pointer; line-height:1;
+    margin-left:0.5rem;
+  }
+  .popover .source-note{
+    font-size:0.76rem;
+    color:var(--fail);
+    background: var(--fail-bg);
+    border:1px solid #e0b9b0;
+    padding:0.5rem 0.7rem;
+    border-radius:6px;
+    margin-top:1rem;
+  }
+
+  /* ---------- Table ---------- */
+  .ledger{
+    background:#FFFDF8;
+    border:1px solid var(--line);
+    border-radius: 10px;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.8rem;
+  }
+
+  table.courses{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.92rem;
+  }
+
+  table.courses thead th{
+    text-align:left;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: Georgia, serif;
+    font-weight:600;
+    letter-spacing:0.03em;
+    padding: 0.75rem 1rem;
+    font-size:0.82rem;
+    text-transform:uppercase;
+  }
+  table.courses thead th.num{ text-align:right; }
+
+  table.courses tbody td{
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--line);
+    font-family: "Courier New", monospace;
+  }
+  table.courses tbody td.course-name{
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  table.courses tbody tr:nth-child(even){ background: rgba(184,145,47,0.05); }
+  table.courses tbody tr.superseded-row{ background: rgba(156,59,59,0.05); opacity:0.65; }
+  table.courses tbody tr.superseded-row .course-name{ text-decoration: line-through; }
+  table.courses tbody tr.added-course{ background: rgba(63,108,81,0.06); }
+  .added-tag{
+    font-family: -apple-system, sans-serif;
+    font-size:0.72rem;
+    color:var(--pass);
+    background:var(--pass-bg);
+    padding:0.05rem 0.5rem;
+    border-radius:999px;
+    margin-left:0.4rem;
+  }
+  table.courses tbody tr:last-child td{ border-bottom:none; }
+  table.courses td.num{ text-align:right; }
+
+  .badge{
+    display:inline-block;
+    padding: 0.12rem 0.6rem;
+    border-radius:999px;
+    font-size:0.78rem;
+    font-family: -apple-system, sans-serif;
+    font-weight:700;
+  }
+  .badge.yes{ background:var(--pass-bg); color:var(--pass); }
+  .badge.no{ background:var(--fail-bg); color:var(--fail); }
+
+  .grade-cell{ display:flex; align-items:baseline; gap:0.4rem; flex-wrap:wrap; }
+  .grade-cell .letter{ font-weight:700; }
+  .grade-cell .score{ color:var(--ink-soft); font-size:0.82rem; }
+  .in-progress-tag{
+    font-family: -apple-system, sans-serif;
+    font-size:0.76rem;
+    color:var(--progress);
+    background:var(--progress-bg);
+    padding:0.05rem 0.5rem;
+    border-radius:999px;
+  }
+  .retake-tag{
+    font-family: -apple-system, sans-serif;
+    font-size:0.72rem;
+    color:var(--fail);
+    background:var(--fail-bg);
+    padding:0.05rem 0.5rem;
+    border-radius:999px;
+    margin-left:0.4rem;
+  }
+
+  /* ---------- Buttons / actions ---------- */
+  .actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.9rem;
+    align-items:flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .action-block{
+    flex:1 1 260px;
+    background:#FFFDF8;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1rem 1.1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .action-block p{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    margin: 0.5rem 0 0;
+  }
+
+  button.calc-btn{
+    font-family: Georgia, serif;
+    font-size: 0.98rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+    padding: 0.65rem 1.2rem;
+    border-radius: 7px;
+    cursor:pointer;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    width:100%;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+  button.calc-btn:hover{ background:#2a3766; }
+  button.calc-btn:active{ transform: translateY(1px); }
+  button.calc-btn.secondary{
+    background:transparent;
+    color:var(--ink);
+    border-color: var(--gold);
+  }
+  button.calc-btn.secondary:hover{ background: var(--gold-light); }
+  button.calc-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+
+  /* ---------- Results ---------- */
+  .results{
+    margin-top: 1.8rem;
+    display:none;
+    gap:1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+  }
+  .results.show{ display:grid; }
+
+  .result-card{
+    background: var(--ink);
+    color: var(--paper);
+    border-radius:10px;
+    padding:1.1rem 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .result-card .label{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color: var(--gold-light);
+    margin-bottom:0.3rem;
+  }
+  .result-card .value{
+    font-family: Georgia, serif;
+    font-size:1.7rem;
+    font-weight:700;
+  }
+  .result-card.wide{ grid-column: 1 / -1; background:#FFFDF8; color:var(--ink); border:1px solid var(--line); }
+  .result-card.wide .label{ color:var(--gold); }
+  .result-card.wide ul{ margin:0.5rem 0 0; padding-left:1.2rem; font-size:0.85rem; color:var(--ink-soft); }
+
+  footer.note{
+    margin-top:2.2rem;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:1rem;
+  }
+
+  @media (max-width:560px){
+    table.courses{ font-size:0.8rem; }
+    table.courses thead th, table.courses tbody td{ padding:0.5rem 0.6rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="letterhead">
+    <div class="seal">GPA</div>
+    <div class="titles">
+      <p class="eyebrow">Student Records</p>
+      <h1>GPA Calculator</h1>
+      <div class="program-line">
+        Program: <strong id="programName">Engineering / Computer Science track</strong>
+        <span class="edit-note">edit in code: #programName text</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="policy-row">
+    <span class="policy-label">GPA calculation policy</span>
+    <span class="info-wrap">
+      <button class="info-btn" id="infoBtn" aria-expanded="false" aria-controls="policyPopover" title="View GPA policy">i</button>
+      <div class="popover" id="policyPopover" role="dialog" aria-label="GPA calculation policy">
+        <button class="close-btn" id="closePopover" aria-label="Close">×</button>
+        <h2>GPA Calculation Policy</h2>
+        <p class="doc-sub">Assumed grading scale — edit the GRADE_SCALE table in code if your institution's cutoffs differ</p>
+
+        <h3>1. Grading scale</h3>
+        <p>Every course is assessed on a numeric scale from 0 to 100 points, which converts to one of seven letter grades:</p>
+        <table>
+          <thead>
+            <tr><th>Letter</th><th>Description</th><th>Point range</th><th>GPA value</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>Excellent</td><td>91–100</td><td>4.0</td><td>Passed</td></tr>
+            <tr><td>B</td><td>Very Good</td><td>81–90</td><td>3.0</td><td>Passed</td></tr>
+            <tr><td>C</td><td>Good</td><td>71–80</td><td>2.0</td><td>Passed</td></tr>
+            <tr><td>D</td><td>Satisfactory</td><td>61–70</td><td>1.0</td><td>Passed</td></tr>
+            <tr><td>E</td><td>Sufficient</td><td>51–60</td><td>0.0</td><td>Passed</td></tr>
+            <tr><td>FX</td><td>Fail (retake allowed)</td><td>41–50</td><td>0.0</td><td>Failed</td></tr>
+            <tr><td>F</td><td>Fail</td><td>0–40</td><td>0.0</td><td>Failed</td></tr>
+          </tbody>
+        </table>
+
+        <h3>2. GPA formula</h3>
+        <p>The Grade Point Average is calculated as the credit-weighted mean of all completed courses (passed or failed), excluding courses currently in progress that have no final score yet:</p>
+        <div class="formula">GPA = Σ (credits × grade points) / Σ (credits)</div>
+
+        <h3>3. Rounding</h3>
+        <p>The resulting GPA is rounded to two decimal places.</p>
+
+        <h3>4. Notes</h3>
+        <ul>
+          <li>Courses still in progress are not included until a final score is recorded.</li>
+          <li>Failed courses (FX, F) contribute 0 grade points but their credits are still counted, lowering the GPA.</li>
+          <li>Each course is counted once, using its most recent final grade — a retaken course's earlier failing attempt is shown for reference but excluded from the totals.</li>
+        </ul>
+      </div>
+    </span>
+  </div>
+
+  <div class="ledger">
+    <table class="courses">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th class="num">Credit</th>
+          <th>Grade</th>
+          <th class="num">Passed</th>
+        </tr>
+      </thead>
+      <tbody id="courseTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <div class="action-block">
+      <button class="calc-btn" id="calcBtn">Calculate</button>
+      <p>Computes your GPA from all courses with a recorded final grade. Courses still in progress (no final score yet) are left out, and a retaken course's earlier failing attempt is excluded in favor of the passing retake.</p>
+    </div>
+    <div class="action-block">
+      <button class="calc-btn secondary" id="calcAiBtn">Calculate with Introduction to AI</button>
+      <p>Introduction to Artificial Intelligence is still in progress. This estimates its final score as <strong>current accumulated points (35) + 30 exam points</strong>, then recalculates the GPA as if that course were finished.</p>
+    </div>
+  </div>
+
+  <div class="results" id="resultsPanel">
+    <div class="result-card">
+      <div class="label">GPA</div>
+      <div class="value" id="gpaValue">—</div>
+    </div>
+    <div class="result-card">
+      <div class="label">Total credits counted</div>
+      <div class="value" id="creditsValue">—</div>
+    </div>
+    <div class="result-card">
+      <div class="label">Total quality points</div>
+      <div class="value" id="pointsValue">—</div>
+    </div>
+    <div class="result-card wide">
+      <div class="label" id="resultTitle">Included in this calculation</div>
+      <ul id="includedList"></ul>
+    </div>
+  </div>
+
+  <footer class="note">
+    Transcript data below — edit the <code>courses</code> array in the page source to add, remove, or correct entries
+    as your record changes. Courses marked "in progress" show the accumulated points so far, for reference only;
+    they are excluded from the GPA until a final score is recorded (except via the "Calculate with Introduction to AI" estimate).
+    The 5 courses tagged "added" (Calculus II, Basics of Physics I, Introduction to Information Theory, IT Project
+    Management, Algorithms and Data Structures) are placeholders assumed at grade A / 100 points / 6 credits, passed.
+  </footer>
+
+</div>
+
+<script>
+
+const courses = [
+  { name: "Calculus I",                                credit: 6, score: 34,    status: "failed",  supersededByRetake: true },
+  { name: "Calculus I (Retake)",                       credit: 6, score: 51,    status: "passed" },
+  { name: "English Language Course C1-1",              credit: 6, score: 88,    status: "passed" },
+  { name: "English Language Course C1-2",              credit: 6, score: 81.70, status: "passed" },
+  { name: "Introduction to Modern Thought I",           credit: 6, score: 63,    status: "passed" },
+  { name: "AWS Cloud Practitioner",                     credit: 6, score: 81.80, status: "passed" },
+  { name: "Computer Organization",                      credit: 6, score: 69.31, status: "passed" },
+  { name: "Computer and Data Networks",                 credit: 6, score: null,  status: "in-progress", currentPoints: 45 },
+  { name: "Computer and Society",                       credit: 6, score: 82,    status: "passed" },
+  { name: "Cyberlaw and Ethics",                        credit: 6, score: 66.20, status: "passed" },
+  { name: "Drones",                                     credit: 6, score: 70,    status: "passed" },
+  { name: "Functional Programming",                     credit: 6, score: 86,    status: "passed" },
+  { name: "Hardware Design and Prototyping",             credit: 6, score: 0,     status: "failed" },
+  { name: "Introduction to Artificial Intelligence",     credit: 6, score: null,  status: "in-progress", isAI: true, currentPoints: 35 },
+  { name: "Introduction to Programming",                credit: 6, score: 91.60, status: "passed" },
+  { name: "Mathematical Foundation of Computing",        credit: 6, score: null,  status: "in-progress", currentPoints: 52 },
+  { name: "Object Oriented Programming",                credit: 6, score: 79,    status: "passed" },
+  { name: "Procedural Programming with C",              credit: 6, score: 0,     status: "failed" },
+  { name: "Programming Languages",                      credit: 6, score: 86,    status: "passed" },
+  { name: "Web Programming",                            credit: 6, score: 63,    status: "passed" },
+
+  // --- 5 additional courses (assumed grade A / 100 / 6 credits / passed) ---
+  { name: "Calculus II",                                credit: 6, score: 100,   status: "passed", added: true },
+  { name: "Basics of Physics I",                        credit: 6, score: 100,   status: "passed", added: true },
+  { name: "Introduction to Information Theory",         credit: 6, score: 100,   status: "passed", added: true },
+  { name: "IT Project Management",                      credit: 6, score: 100,   status: "passed", added: true },
+  { name: "Algorithms and Data Structures",             credit: 6, score: 100,   status: "passed", added: true },
+];
+
+const GRADE_SCALE = [
+  { min: 91, max: 100, letter: "A",  points: 4.0 },
+  { min: 81, max: 90,  letter: "B",  points: 3.0 },
+  { min: 71, max: 80,  letter: "C",  points: 2.0 },
+  { min: 61, max: 70,  letter: "D",  points: 1.0 },
+  { min: 51, max: 60,  letter: "E",  points: 0.0 },
+  { min: 41, max: 50,  letter: "FX", points: 0.0 },
+  { min: 0,  max: 40,  letter: "F",  points: 0.0 },
+];
+
+function scoreToGrade(score){
+  if (score === null || score === undefined) return null;
+  return GRADE_SCALE.find(g => score >= g.min && score <= g.max) || null;
+}
+
+function renderTable(){
+  const tbody = document.getElementById("courseTableBody");
+  tbody.innerHTML = "";
+  courses.forEach(c => {
+    const tr = document.createElement("tr");
+    if (c.supersededByRetake) tr.classList.add("superseded-row");
+    if (c.added) tr.classList.add("added-course");
+
+    const nameTd = document.createElement("td");
+    nameTd.className = "course-name";
+    nameTd.textContent = c.name;
+    if (c.supersededByRetake){
+      const tag = document.createElement("span");
+      tag.className = "retake-tag";
+      tag.textContent = "superseded";
+      nameTd.appendChild(tag);
+    }
+    if (c.added){
+      const tag = document.createElement("span");
+      tag.className = "added-tag";
+      tag.textContent = "added";
+      nameTd.appendChild(tag);
+    }
+    tr.appendChild(nameTd);
+
+    const creditTd = document.createElement("td");
+    creditTd.className = "num";
+    creditTd.textContent = c.credit;
+    tr.appendChild(creditTd);
+
+    const gradeTd = document.createElement("td");
+    if (c.status === "in-progress"){
+      const ptsNote = (typeof c.currentPoints === "number") ? ` (${c.currentPoints} pts so far)` : "";
+      gradeTd.innerHTML = `<span class="in-progress-tag">in progress${ptsNote}</span>`;
+    } else {
+      const g = scoreToGrade(c.score);
+      gradeTd.innerHTML = `<span class="grade-cell"><span class="letter">${g ? g.letter : "—"}</span><span class="score">(${c.score})</span></span>`;
+    }
+    tr.appendChild(gradeTd);
+
+    const passedTd = document.createElement("td");
+    passedTd.className = "num";
+    const passed = c.status === "passed";
+    passedTd.innerHTML = `<span class="badge ${passed ? "yes" : "no"}">${passed ? "Yes" : "No"}</span>`;
+    tr.appendChild(passedTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function computeGPA(useAiEstimate){
+  let totalCredits = 0;
+  let totalPoints = 0;
+  const included = [];
+  const excluded = [];
+
+  courses.forEach(c => {
+    if (c.supersededByRetake){
+      excluded.push(`${c.name} — earlier failing attempt, superseded by retake`);
+      return;
+    }
+
+    let score = c.score;
+    let note = "";
+
+    if (c.isAI && useAiEstimate){
+      score = c.currentPoints + 30;
+      note = ` — estimated final score ${score} (${c.currentPoints} accumulated + 30 exam)`;
+    }
+
+    const hasFinalGrade = (score !== null && score !== undefined);
+
+    if (!hasFinalGrade){
+      excluded.push(`${c.name} — still in progress, no final score`);
+      return;
+    }
+
+    const g = scoreToGrade(score);
+    totalCredits += c.credit;
+    totalPoints += c.credit * g.points;
+    included.push(`${c.name} — ${g.letter} (${score}), ${c.credit} credits${note}`);
+  });
+
+  const gpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+
+  return {
+    gpa: gpa.toFixed(2),
+    totalCredits,
+    totalPoints: totalPoints.toFixed(1),
+    included,
+    excluded
+  };
+}
+
+function showResults(result, title){
+  document.getElementById("gpaValue").textContent = result.gpa;
+  document.getElementById("creditsValue").textContent = result.totalCredits;
+  document.getElementById("pointsValue").textContent = result.totalPoints;
+  document.getElementById("resultTitle").textContent = title;
+
+  const list = document.getElementById("includedList");
+  list.innerHTML = "";
+  result.included.forEach(line => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    list.appendChild(li);
+  });
+  result.excluded.forEach(line => {
+    const li = document.createElement("li");
+    li.textContent = "Excluded — " + line;
+    li.style.color = "var(--fail)";
+    list.appendChild(li);
+  });
+
+  document.getElementById("resultsPanel").classList.add("show");
+  document.getElementById("resultsPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+document.getElementById("calcBtn").addEventListener("click", () => {
+  const result = computeGPA(false);
+  showResults(result, "Included in this calculation");
+});
+
+document.getElementById("calcAiBtn").addEventListener("click", () => {
+  const result = computeGPA(true);
+  showResults(result, "Included in this calculation (with Introduction to AI estimated)");
+});
+
+// Popover behavior
+const infoBtn = document.getElementById("infoBtn");
+const popover = document.getElementById("policyPopover");
+const closePopover = document.getElementById("closePopover");
+
+function openPopover(){
+  popover.classList.add("open");
+  infoBtn.setAttribute("aria-expanded", "true");
+}
+function hidePopover(){
+  popover.classList.remove("open");
+  infoBtn.setAttribute("aria-expanded", "false");
+}
+
+infoBtn.addEventListener("click", () => {
+  popover.classList.contains("open") ? hidePopover() : openPopover();
+});
+infoBtn.addEventListener("mouseenter", openPopover);
+closePopover.addEventListener("click", hidePopover);
+document.addEventListener("click", (e) => {
+  if (!popover.contains(e.target) && e.target !== infoBtn){
+    hidePopover();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") hidePopover();
+});
+
+renderTable();
+</script>
+</body>
+</html>
